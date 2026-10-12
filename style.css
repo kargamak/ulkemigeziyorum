@@ -1,0 +1,59 @@
+﻿:root{
+  --bg:#fafaf8; --ink:#222; --muted:#8a8a85; --line:#d9d9d3;
+  --visited:#4f9d7a; --passed:#6c9bc9; --want:#e0a03c; --no:#c9605c; --none:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-weight:400}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:24px 32px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:8px}
+h1{font-size:20px;font-weight:500;margin:0;letter-spacing:.02em}
+.stats{margin:0;font-size:13px;color:var(--muted)}
+main{display:grid;grid-template-columns:1fr 340px;min-height:calc(100vh - 73px)}
+.map-wrap{position:relative;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#map{width:100%;max-height:82vh}
+#map path{fill:var(--none);stroke:var(--ink);stroke-width:.6;stroke-linejoin:round;cursor:pointer;transition:fill .15s}
+#map path:hover{fill:#eee}
+#map path.sel{stroke-width:2}
+#map path[data-s=visited]{fill:var(--visited)}
+#map path[data-s=passed]{fill:var(--passed)}
+#map path[data-s=want]{fill:var(--want)}
+#map path[data-s=no]{fill:var(--no)}
+#map path[data-s]:hover{opacity:.8}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:4px 8px;border-radius:3px;z-index:5}
+.legend{list-style:none;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;padding:0;margin:16px 0 0;font-size:13px;color:var(--muted)}
+.legend i,.choices i{display:inline-block;width:10px;height:10px;border:1px solid var(--ink);border-radius:50%;margin-right:6px;background:var(--c,#fff)}
+.panel{border-left:1px solid var(--line);padding:24px;display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 73px);overflow:auto}
+.empty{color:var(--muted);font-size:14px}
+h2{font-size:18px;font-weight:500;margin:0 0 12px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.choices button{font:inherit;font-size:13px;padding:8px;background:none;border:1px solid var(--line);border-radius:4px;cursor:pointer;text-align:left;transition:border-color .15s}
+.choices button:hover{border-color:var(--ink)}
+.choices button.on{border-color:var(--ink);background:#fff}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+textarea,input[type=search]{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:4px;padding:8px;background:#fff;outline:none}
+textarea{min-height:110px;resize:vertical}
+textarea:focus,input:focus{border-color:var(--ink)}
+.list{list-style:none;margin:0;padding:0;flex:1;overflow:auto;min-height:120px}
+.list li{display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:14px;border-bottom:1px solid #eee;cursor:pointer}
+.list li:hover{background:#f0f0ec}
+.list li i{width:8px;height:8px;border-radius:50%;border:1px solid var(--ink);background:var(--c,#fff)}
+.list li small{margin-left:auto;color:var(--muted)}
+.reset{font:inherit;font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;align-self:flex-start;padding:0}
+.reset:hover{color:var(--no)}
+@media(max-width:850px){main{grid-template-columns:1fr}.panel{border-left:none;border-top:1px solid var(--line);max-height:none}}
+
+.toggle{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;margin:0;cursor:pointer}
+.popover{position:fixed;z-index:10;width:280px;background:#fff;border:1px solid var(--ink);border-radius:6px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.popover[hidden]{display:none}
+.popover h2{margin-bottom:10px}
+.popover .choices{margin-bottom:12px}
+.close{position:absolute;top:6px;right:10px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+.close:hover{color:var(--ink)}
+.lbl{font-size:10.5px;font-weight:500;fill:var(--ink);text-anchor:middle;pointer-events:none;display:none;paint-order:stroke;stroke:#fff;stroke-width:2.5px;stroke-linejoin:round;font-family:Inter,sans-serif}
+.show-labels .lbl{display:block}
+
+
+.share{font:inherit;font-size:13px;padding:8px 16px;background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:4px;cursor:pointer;transition:background .15s,color .15s}
+.share:hover{background:#fff;color:var(--ink)}
+
+main.no-panel{grid-template-columns:1fr}
+main.no-panel .panel{display:none}

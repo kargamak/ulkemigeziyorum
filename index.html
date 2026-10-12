@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ülkemi Geziyorum – Türkiye İl Haritası</title>
+<meta name="description" content="Türkiye'de gezdiğin, üstünden geçtiğin ve gitmek istediğin illeri işaretle, notlar ekle, haritanı paylaş.">
+<meta property="og:title" content="Ülkemi Geziyorum">
+<meta property="og:description" content="Türkiye il haritanı işaretle ve paylaş.">
+<meta name="theme-color" content="#fafaf8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><circle cx='5' cy='5' r='4' fill='%234f9d7a'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Ülkemi Geziyorum</h1>
+  <label class="toggle"><input type="checkbox" id="labels"> İsimleri göster</label>
+  <label class="toggle"><input type="checkbox" id="panelToggle" checked> Liste paneli</label>
+  <p id="stats" class="stats"></p>
+  <button id="share" class="share">Haritayı paylaş</button>
+</header>
+
+<main>
+  <section class="map-wrap" aria-label="Türkiye haritası">
+    <svg id="map" role="img" aria-label="Türkiye illeri"></svg>
+    <div id="tip" class="tip" hidden></div>
+    <ul class="legend" id="legend"></ul>
+  </section>
+
+  <div id="detail" class="popover" hidden>
+    <button id="close" class="close" aria-label="Kapat">×</button>
+    <h2 id="pname"></h2>
+    <div class="choices" id="choices"></div>
+    <label for="note">Notlarım</label>
+    <textarea id="note" placeholder="Anılar, gidilecek yerler, yenilecekler…"></textarea>
+  </div>
+
+  <aside class="panel">
+
+    <div class="list-head">
+      <input id="search" type="search" placeholder="İl ara…" aria-label="İl ara">
+    </div>
+    <ul id="list" class="list"></ul>
+    <button id="reset" class="reset">Tümünü sıfırla</button>
+  </aside>
+</main>
+
+<script src="map-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
