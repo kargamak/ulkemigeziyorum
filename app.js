@@ -25,11 +25,12 @@ PROVINCES.forEach(p => {
   el.setAttribute('d', p.d);
   el.setAttribute('fill-rule', 'evenodd');
   el.onclick = e => { e.stopPropagation(); select(p.n); };
-  el.onmousemove = e => {
+  el.onpointermove = e => {
+    if (e.pointerType !== 'mouse') return;
     const t = $('tip'); t.hidden = false; t.textContent = p.n;
     t.style.left = e.clientX + 12 + 'px'; t.style.top = e.clientY + 12 + 'px';
   };
-  el.onmouseleave = () => $('tip').hidden = true;
+  el.onpointerleave = () => $('tip').hidden = true;
   gp.appendChild(el);
   paths[p.n] = el;
 });
@@ -93,6 +94,7 @@ function select(name) {
   $('note').value = (data[name] || {}).note || '';
   refresh();
   pop.hidden = false;
+  if (isMobile()) { pop.style.left = pop.style.top = ''; return; } // alt sayfa (CSS)
   const r = paths[name].getBoundingClientRect();
   const w = pop.offsetWidth, h = pop.offsetHeight;
   let x = r.left + r.width / 2 - w / 2, y = r.bottom + 8;
@@ -204,3 +206,79 @@ const applyPanel = () => {
 try { $('panelToggle').checked = localStorage.getItem(KEY + '-panel') !== '0'; } catch (e) {}
 $('panelToggle').onchange = applyPanel;
 applyPanel();
+
+// ---- Mobil: parmakla yakınlaştır / kaydır ----
+function isMobile() { return matchMedia('(max-width:600px)').matches; }
+const vb = { x: 0, y: 0, w: MAP_W, h: MAP_H };
+function setVB() {
+  vb.w = Math.min(MAP_W, Math.max(MAP_W / 10, vb.w));
+  vb.h = vb.w * MAP_H / MAP_W;
+  vb.x = Math.min(Math.max(0, vb.x), MAP_W - vb.w);
+  vb.y = Math.min(Math.max(0, vb.y), MAP_H - vb.h);
+  svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  svg.style.setProperty('--k', vb.w / MAP_W); // çizgi kalınlığı sabit kalsın
+  const z = vb.w < MAP_W - 0.5;
+  svg.classList.toggle('zoomed', z);
+  $('zoomReset').hidden = !z;
+}
+function zoomAt(cx, cy, k) {
+  const p = new DOMPoint(cx, cy).matrixTransform(svg.getScreenCTM().inverse());
+  const nw = Math.min(MAP_W, Math.max(MAP_W / 10, vb.w / k)), f = nw / vb.w;
+  vb.x = p.x - (p.x - vb.x) * f;
+  vb.y = p.y - (p.y - vb.y) * f;
+  vb.w = nw;
+  setVB();
+}
+function panBy(dx, dy) {
+  const s = svg.getScreenCTM().a;
+  vb.x -= dx / s; vb.y -= dy / s;
+  setVB();
+}
+const zoomCenter = k => {
+  const r = svg.getBoundingClientRect();
+  zoomAt(r.left + r.width / 2, r.top + r.height / 2, k);
+};
+$('zoom').onclick = e => e.stopPropagation();
+$('zoomIn').onclick = () => zoomCenter(1.6);
+$('zoomOut').onclick = () => zoomCenter(1 / 1.6);
+$('zoomReset').onclick = () => { vb.x = vb.y = 0; vb.w = MAP_W; setVB(); };
+
+let touches = null, moved = false, lastGesture = 0;
+const pts = e => [...e.touches].map(t => ({ x: t.clientX, y: t.clientY }));
+const dist = a => Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+const mid = a => ({ x: (a[0].x + a[1].x) / 2, y: (a[0].y + a[1].y) / 2 });
+svg.addEventListener('touchstart', e => {
+  touches = pts(e);
+  if (e.touches.length === 1) moved = false; else moved = true;
+}, { passive: true });
+svg.addEventListener('touchmove', e => {
+  if (!touches) return;
+  const cur = pts(e);
+  if (cur.length >= 2 && touches.length >= 2) {
+    e.preventDefault();
+    const m0 = mid(touches), m1 = mid(cur);
+    panBy(m1.x - m0.x, m1.y - m0.y);
+    zoomAt(m1.x, m1.y, dist(cur) / dist(touches));
+    moved = true; lastGesture = Date.now();
+  } else if (cur.length === 1 && touches.length === 1) {
+    const dx = cur[0].x - touches[0].x, dy = cur[0].y - touches[0].y;
+    if (!moved && Math.hypot(dx, dy) < 8) return; // küçük titreme = dokunma
+    moved = true; lastGesture = Date.now();
+    if (!svg.classList.contains('zoomed')) { touches = null; return; } // sayfa kaysın
+    e.preventDefault();
+    panBy(dx, dy);
+  }
+  touches = cur;
+}, { passive: false });
+svg.addEventListener('touchend', e => { touches = e.touches.length ? pts(e) : null; }, { passive: true });
+// Sürükleme / yakınlaştırma sonrası yanlışlıkla il seçilmesin
+svg.addEventListener('click', e => {
+  if (Date.now() - lastGesture < 350) { e.stopPropagation(); e.preventDefault(); }
+}, true);
+// Masaüstü: trackpad ile sıkıştırma (ctrl + tekerlek)
+svg.addEventListener('wheel', e => {
+  if (!e.ctrlKey) return;
+  e.preventDefault();
+  zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
+}, { passive: false });
+setVB();
